@@ -1,0 +1,6 @@
+﻿{
+    "body":  "HTML page: \u0027No such app\u0027 - not a JSON response",
+    "status":  404,
+    "_note":  "FAILURE RECORD - Mars Rover Photos API returned HTTP 404 with HTML \u0027No such app\u0027 page. The API endpoint at api.nasa.gov/mars-photos/api/v1 appears to have been decommissioned or moved.",
+    "tested_at":  "2026-10-31T11:41:18Z"
+}
