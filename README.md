@@ -41,26 +41,26 @@ Upstream NASA & LLM Services (nasa_client.py)
 
 ## 2. Platform Modules & Features
 
-### Astronomy Picture of the Day (`/index.html`)
+### Astronomy Picture of the Day
 - **Daily Featured Media**: Displays NASA's daily featured astronomical image or interactive video player accompanied by professional astronomer annotations.
 - **Historical Archive Exploration**: Date selector providing direct access to NASA's image archives spanning back to June 16, 1995.
 - **Resilient Fallback Engine**: Curated high-resolution fallback assets ensuring zero broken images during upstream NASA content outages.
 - **Ambient Starfield**: Mathematical Canvas-based dynamic background starfield with viewport adaptation and reduced-motion detection.
 
-### Asteroid Tracker — Tactical SENTRY Command (`/asteroids.html`)
+### Asteroid Tracker — Tactical SENTRY Command
 - **Interactive 3D Geocentric Vector Globe**: High-precision Canvas 2D projection rendering a wireframe Earth, continental contours, Low Earth Orbit (LEO) satellite swarm, the Moon's orbital plane at 1 Lunar Distance ($1\text{ LD} \approx 384,400\text{ km}$), and 3D hyperbolic encounter trajectory vectors. Supports full mouse/touch drag rotation, zoom scaling, auto-spin, and camera reset.
 - **360° Phosphor Radar Sweep**: Polar proximity grid plotting near-Earth objects in Lunar Distances, featuring a continuous rotating cathode radar sweep beam with trailing phosphor persistence and azimuth degree rings ($000^\circ$, $090^\circ$, $180^\circ$, $270^\circ$).
 - **4D Mission Time Scrubber**: Interactive timeline playback with variable simulation speeds ($1\times$, $5\times$, $20\times$), encounter pips, perigee countdowns, and real-time interpolation of asteroid trajectory vectors in both 3D and radar views.
 - **Live CNEOS Telemetry Downlink Terminal**: Real-time monospace data stream logging orbital ephemeris packets, target state vectors, lock-on designations, and approach notices.
 - **Holographic Targeting Drawer**: Slide-out detail inspector featuring a rotating 3D polyhedral asteroid wireframe mesh, tri-level MAGI threat assessment banner (Level 0 / Level 1 / Level 2), analytical risk gauges, multi-unit telemetry (LD, km, AU, light-seconds, Mach velocity), human-scale comparative visual gauge, and historical approach logs.
 
-### Mars Image Explorer (`/mars.html`)
+### Mars Image Explorer
 - **Multi-Rover Mission Coverage**: High-resolution image search across NASA's Curiosity, Perseverance, Opportunity, and Spirit rover archives.
 - **Camera & Sol Filtering**: Filter by specific rover instrument cameras (MAST, NAVCAM, HAZCAM, CHEMCAM, PANCAM) and mission sol or Earth date.
 - **Modal Lightbox Inspection**: Full-screen high-fidelity asset viewer with image metadata extraction and NASA library identifiers.
 - **The Sky That Day**: Synchronous dual-summary providing the APOD feature and closest asteroid flyby that occurred on the date the rover photo was captured.
 
-### Mars Data Lab & Conversational AI (`/lab.html`)
+### Mars Data Lab & Conversational AI
 - **Cross-Mission Mission Telemetry**: Comparative operational statistics across rovers, including active mission sols, quiet intervals, camera usage distributions, and productivity indices.
 - **Photo Production Bucketing**: Sol-bucketed temporal volume analysis highlighting mission phases and peak survey activity.
 - **Cumulative Growth Curves**: Normalized `same_age` sol-indexed comparison curves tracking cumulative photograph production across rovers.
@@ -68,26 +68,7 @@ Upstream NASA & LLM Services (nasa_client.py)
 
 ---
 
-## 3. Configuration & Environment Variables
-
-Space Explorer is configured via environment variables.
-
-| Variable | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `NASA_API_KEY` | string | `DEMO_KEY` | NASA API credential from api.nasa.gov. Operates on `DEMO_KEY` when omitted. |
-| `GROQ_API_KEY` | string | `""` | Groq Cloud API key for AI Assistant capabilities. |
-| `GROQ_MODEL` | string | `qwen/qwen3.8-27b` | Model identifier used for tool calling on Groq Cloud. |
-| `ASSISTANT_ENGINE` | string | `groq` | Assistant engine selector: `groq` (lightweight native client) or `langgraph` (stateful ReAct agent). |
-| `SERVE_FRONTEND` | boolean | `true` | Enables FastAPI static file serving for the frontend directory. |
-| `CORS_ORIGINS` | string | `http://localhost:8000,...` | Comma-delimited origins permitted for cross-origin resource sharing. |
-| `CACHE_TTL_SECONDS` | integer | `3600` | In-memory cache entry time-to-live in seconds (1 hour default). |
-| `CACHE_MAX_ENTRIES` | integer | `500` | Maximum item limit for the LRU cache before eviction. |
-| `REQUEST_TIMEOUT_SECONDS` | float | `10.0` | Upstream NASA HTTP timeout limit in seconds. |
-| `PORT` | integer | `8000` | Server listening port. |
-
----
-
-## 4. API Endpoints Specification
+## 3. API Endpoints Specification
 
 | Method | Path | Summary & Purpose |
 | :--- | :--- | :--- |
@@ -110,7 +91,7 @@ Space Explorer is configured via environment variables.
 
 ---
 
-## 5. Security & Defense In Depth
+## 4. Security & Defense In Depth
 
 Space Explorer enforces strict production security headers on all HTTP responses:
 
@@ -122,7 +103,7 @@ Space Explorer enforces strict production security headers on all HTTP responses
 
 ---
 
-## 6. Testing & Quality Assurance
+## 5. Testing & Quality Assurance
 
 Space Explorer maintains a 100% offline unit and integration test suite:
 
