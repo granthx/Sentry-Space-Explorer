@@ -30,6 +30,16 @@ jobs:
         pip install -r backend/requirements.txt
 
     - name: Run pytest
+      working-directory: backend
+      env:
+        PYTHONPATH: .
       run: |
-        cd backend
-        python -m pytest -v
+        python -m pytest -v 2>&1 | tee pytest_output.log
+        EXIT_CODE=${PIPESTATUS[0]}
+        if [ $EXIT_CODE -ne 0 ]; then
+          echo "## Pytest Failed (exit code $EXIT_CODE)" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 pytest_output.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          exit $EXIT_CODE
+        fi
