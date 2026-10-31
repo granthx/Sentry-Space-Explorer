@@ -54,16 +54,16 @@ async def chat(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, Any]:
     """Execute a chat turn with tool-calling capabilities."""
-    # 1. Check configuration
+    # 1. Validate conversation messages
+    if payload.messages[-1].role != "user":
+        raise ApiError(422, "The final message in the conversation must be from the user.")
+
+    # 2. Check configuration
     if not settings.groq_api_key.strip():
         raise ApiError(
             503,
             "The assistant is not configured. Add GROQ_API_KEY to backend/.env.",
         )
-
-    # 2. Validate conversation messages
-    if payload.messages[-1].role != "user":
-        raise ApiError(422, "The final message in the conversation must be from the user.")
 
     # 3. Rate limiting
     client_ip = request.client.host if request.client else "127.0.0.1"

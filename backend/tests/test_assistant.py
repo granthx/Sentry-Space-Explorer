@@ -212,7 +212,11 @@ def test_chat_unconfigured_returns_503(api, monkeypatch):
     assert "The assistant is not configured" in resp.json()["error"]["message"]
 
 
-def test_chat_validation_errors_422(api):
+def test_chat_validation_errors_422(api, monkeypatch):
+    from app.config import get_settings
+    settings = get_settings()
+    monkeypatch.setattr(settings, "groq_api_key", "gsk-mock")
+
     # Empty messages
     assert api.http.post("/api/assistant/chat", json={"messages": []}).status_code == 422
 
