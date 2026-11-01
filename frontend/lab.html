@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mars Data Lab - Space Explorer</title>
+  <meta name="description" content="Mission statistics, photo production curves, and camera analytics computed from Mars rover manifests.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/lab.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+  <a class="skip" href="#lab-main">Skip to data lab</a>
+
+  <div class="nebula" aria-hidden="true"></div>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/">Today's sky</a>
+      <a href="/asteroids.html">Asteroids</a>
+      <a href="/mars.html">Mars</a>
+      <a href="/lab.html" class="active">Data Lab</a>
+      <a href="/#modules">Modules</a>
+      <a href="#status" class="status-link"><span class="dot" id="nav-dot" data-state="checking"></span><span id="nav-status">Checking backend</span></a>
+    </nav>
+  </header>
+
+  <main id="lab-main">
+    <!-- Offline alert -->
+    <div id="offline-alert" class="notice offline-notice" style="display: none;" role="alert">
+      <h3>The backend isn't running</h3>
+      <p>In a terminal, open the backend folder and run: <code>uvicorn app.main:app --reload</code>. Then refresh this page.</p>
+    </div>
+
+    <!-- Error message alert -->
+    <div id="error-alert" class="notice error-notice" style="display: none;" role="alert">
+      <h3 id="error-alert-title">Unable to load data</h3>
+      <p id="error-alert-msg">An unexpected error occurred.</p>
+    </div>
+
+    <section class="lab-hero">
+      <div class="hero-content">
+        <h1>Mars Data Lab</h1>
+        <p class="lead">Mission analytics, camera usage, and photographic trends computed from Mars rover manifests.</p>
+      </div>
+    </section>
+
+    <!-- Rover Selection Tabs -->
+    <section class="rover-select-section" aria-label="Rover selection">
+      <div class="rover-tabs" role="tablist" id="rover-tabs">
+        <button type="button" role="tab" class="rover-tab active" data-rover="curiosity" id="tab-curiosity" aria-selected="true" aria-controls="rover-panel">
+          <span class="rover-tab-name">Curiosity</span>
+          <span class="rover-tab-meta">Active &bull; Sol 4100+</span>
+        </button>
+        <button type="button" role="tab" class="rover-tab" data-rover="perseverance" id="tab-perseverance" aria-selected="false" aria-controls="rover-panel">
+          <span class="rover-tab-name">Perseverance</span>
+          <span class="rover-tab-meta">Active &bull; Sol 1100+</span>
+        </button>
+        <button type="button" role="tab" class="rover-tab" data-rover="opportunity" id="tab-opportunity" aria-selected="false" aria-controls="rover-panel">
+          <span class="rover-tab-name">Opportunity</span>
+          <span class="rover-tab-meta">Retired &bull; 5,111 sols</span>
+        </button>
+        <button type="button" role="tab" class="rover-tab" data-rover="spirit" id="tab-spirit" aria-selected="false" aria-controls="rover-panel">
+          <span class="rover-tab-name">Spirit</span>
+          <span class="rover-tab-meta">Retired &bull; 2,210 sols</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Selected Rover Metrics & Charts Panel -->
+    <div id="rover-panel" role="tabpanel" aria-labelledby="tab-curiosity">
+      <!-- 5 Stat Tiles -->
+      <section class="stat-tiles" aria-label="Rover summary statistics">
+        <article class="stat-tile">
+          <span class="stat-label">Total photos</span>
+          <span class="stat-val" id="stat-total-photos">--</span>
+          <span class="stat-hint" id="stat-landing">Landed --</span>
+        </article>
+
+        <article class="stat-tile">
+          <span class="stat-label">Active sols</span>
+          <span class="stat-val" id="stat-active-sols">--</span>
+          <span class="stat-hint" id="stat-quiet-sols">-- quiet sols</span>
+        </article>
+
+        <article class="stat-tile">
+          <span class="stat-label">Activity rate</span>
+          <span class="stat-val" id="stat-activity-rate">--%</span>
+          <span class="stat-hint">Sols with photo transmissions</span>
+        </article>
+
+        <article class="stat-tile">
+          <span class="stat-label">Avg photos / active sol</span>
+          <span class="stat-val" id="stat-avg-photos">--</span>
+          <span class="stat-hint" id="stat-median-photos">Median: --</span>
+        </article>
+
+        <article class="stat-tile">
+          <span class="stat-label">Mission length</span>
+          <span class="stat-val" id="stat-mission-length">-- sols</span>
+          <span class="stat-hint" id="stat-status">Status: --</span>
+        </article>
+      </section>
+
+      <!-- Primary Charts Section -->
+      <section class="charts-grid">
+        <!-- Chart 1: Time Series -->
+        <article class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h2 class="chart-title">Photos over mission time</h2>
+              <p class="chart-subtitle">Photo production grouped into regular sol intervals</p>
+            </div>
+            <div class="bucket-selector" role="group" aria-label="Sol bucket size">
+              <span class="bucket-label">Interval:</span>
+              <button type="button" class="bucket-btn" data-bucket="25">25 sols</button>
+              <button type="button" class="bucket-btn active" data-bucket="50">50 sols</button>
+              <button type="button" class="bucket-btn" data-bucket="100">100 sols</button>
+              <button type="button" class="bucket-btn" data-bucket="250">250 sols</button>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chart-timeline" aria-label="Bar chart showing photos taken over mission time"></canvas>
+          </div>
+          <p class="chart-summary" id="timeline-summary">Loading mission timeline...</p>
+          <!-- Accessible table alternative -->
+          <div class="sr-only">
+            <table id="timeline-table" aria-label="Photos over mission time table data">
+              <thead><tr><th>Sol Range</th><th>Photos</th><th>Active Sols</th><th>Average / Sol</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Chart 2: Camera Usage -->
+        <article class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h2 class="chart-title">Camera usage</h2>
+              <p class="chart-subtitle">Sols with photos from each camera (manifest records camera presence per sol)</p>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chart-cameras" aria-label="Horizontal bar chart showing sols with photos from each camera"></canvas>
+          </div>
+          <p class="chart-summary" id="camera-summary">Loading camera statistics...</p>
+          <!-- Accessible table alternative -->
+          <div class="sr-only">
+            <table id="camera-table" aria-label="Camera usage table data">
+              <thead><tr><th>Camera</th><th>Sols Used</th><th>Share of Active Sols</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- Deep Dive Data Tables -->
+      <section class="tables-grid">
+        <!-- Busiest Sols Table -->
+        <article class="table-card">
+          <div class="table-card-header">
+            <h2 class="table-title">Top 10 busiest sols</h2>
+            <p class="table-subtitle">Sols with the highest photographic output</p>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="busiest-table">
+              <thead>
+                <tr>
+                  <th scope="col">Sol</th>
+                  <th scope="col">Earth Date</th>
+                  <th scope="col" class="num-col">Photos</th>
+                  <th scope="col" class="action-col">Explore</th>
+                </tr>
+              </thead>
+              <tbody id="busiest-tbody">
+                <tr><td colspan="4" class="empty-cell">Loading busiest sols...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Longest Quiet Stretches Table -->
+        <article class="table-card">
+          <div class="table-card-header">
+            <h2 class="table-title">Longest quiet stretches</h2>
+            <p class="table-subtitle">Gaps between consecutive active sols (solar conjunctions and stand-downs)</p>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="gaps-table">
+              <thead>
+                <tr>
+                  <th scope="col">From Sol</th>
+                  <th scope="col">To Sol</th>
+                  <th scope="col" class="num-col">Duration</th>
+                  <th scope="col">Typical Cause</th>
+                </tr>
+              </thead>
+              <tbody id="gaps-tbody">
+                <tr><td colspan="4" class="empty-cell">Loading quiet gaps...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <!-- Multi-Rover Comparison Section -->
+    <section class="compare-section" aria-labelledby="compare-heading">
+      <div class="section-head">
+        <div>
+          <h2 id="compare-heading">Mission comparison</h2>
+          <p class="lead">Compare photographic pace at equal mission age across rovers.</p>
+        </div>
+        <div class="compare-toggles" id="compare-toggles" role="group" aria-label="Select rovers to compare">
+          <label class="toggle-pill curiosity-pill">
+            <input type="checkbox" name="rover-comp" value="curiosity" checked>
+            <span>Curiosity</span>
+          </label>
+          <label class="toggle-pill perseverance-pill">
+            <input type="checkbox" name="rover-comp" value="perseverance" checked>
+            <span>Perseverance</span>
+          </label>
+          <label class="toggle-pill opportunity-pill">
+            <input type="checkbox" name="rover-comp" value="opportunity">
+            <span>Opportunity</span>
+          </label>
+          <label class="toggle-pill spirit-pill">
+            <input type="checkbox" name="rover-comp" value="spirit">
+            <span>Spirit</span>
+          </label>
+        </div>
+      </div>
+
+      <article class="chart-card comparison-card">
+        <div class="chart-card-header">
+          <div>
+            <h3 class="chart-title">Cumulative photos by mission age</h3>
+            <p class="chart-subtitle">Progress at identical sol milestones (e.g. sol 100, 500, 1000). Rovers are omitted if they have not reached that age.</p>
+          </div>
+        </div>
+        <div class="chart-wrapper comparison-chart-wrapper">
+          <canvas id="chart-compare" aria-label="Line chart comparing cumulative photos taken by mission age"></canvas>
+        </div>
+        <p class="chart-summary" id="compare-summary">Loading comparison data...</p>
+        <!-- Accessible table alternative -->
+        <div class="sr-only">
+          <table id="compare-table" aria-label="Cumulative photos comparison table data">
+            <thead><tr><th>Mission Age (Sol)</th><th>Curiosity</th><th>Perseverance</th><th>Opportunity</th><th>Spirit</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- AI Assistant Section -->
+    <section class="assistant-section" id="assistant" aria-labelledby="assistant-heading">
+      <div class="assistant-card">
+        <div class="assistant-card-header">
+          <div>
+            <div class="assistant-badge">Phase 3 &bull; AI Assistant</div>
+            <h2 id="assistant-heading">Ask about the data</h2>
+            <p class="lead">Ask questions about asteroid passes, Mars rover missions, and NASA astronomy pictures in plain language.</p>
+          </div>
+          <button type="button" class="btn ghost btn-sm" id="btn-clear-chat">New chat</button>
+        </div>
+
+        <!-- Setup Alert (if 503 unconfigured) -->
+        <div id="assistant-setup-notice" class="notice offline-notice" style="display: none;" role="alert">
+          <h3>Assistant Not Configured</h3>
+          <p id="assistant-setup-text">To enable the AI assistant, add your Groq API key to <code>backend/.env</code> as <code>GROQ_API_KEY=...</code> and restart the backend.</p>
+        </div>
+
+        <!-- Prompt Suggestions -->
+        <div class="suggested-prompts" id="suggested-prompts" aria-label="Suggested questions">
+          <span class="prompts-label">Try asking:</span>
+          <button type="button" class="prompt-chip" data-prompt="Which asteroids pass closest to Earth this week?">Which asteroids pass closest to Earth this week?</button>
+          <button type="button" class="prompt-chip" data-prompt="Show me Perseverance photos from sol 300.">Show me Perseverance photos from sol 300</button>
+          <button type="button" class="prompt-chip" data-prompt="Which rover takes more photos per active sol?">Which rover takes more photos per active sol?</button>
+          <button type="button" class="prompt-chip" data-prompt="What was the picture of the day on 2024-01-01?">What was the APOD on 2024-01-01?</button>
+        </div>
+
+        <!-- Messages Log -->
+        <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Conversation messages">
+          <div class="chat-bubble assistant-bubble">
+            <div class="bubble-header"><span class="sender-name">Space Explorer Assistant</span></div>
+            <div class="bubble-content">
+              <p>Hello! I can answer questions by querying live NASA data on near-Earth asteroids, Mars rover manifests, and astronomy pictures. What would you like to explore?</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typing status indicator -->
+        <div class="typing-indicator" id="typing-indicator" style="display: none;" aria-live="polite">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-text">Investigating NASA data...</span>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form class="chat-form" id="chat-form">
+          <div class="chat-input-wrapper">
+            <textarea
+              id="chat-input"
+              class="chat-input"
+              rows="2"
+              placeholder="Ask a question about asteroids, rovers, or astronomy... (Press Enter to send, Shift+Enter for new line)"
+              maxlength="2000"
+              aria-label="Ask a question"
+            ></textarea>
+            <div class="chat-controls">
+              <span class="char-counter" id="char-counter">0 / 2000</span>
+              <div class="chat-buttons">
+                <button type="button" class="btn ghost btn-sm btn-stop" id="btn-stop" style="display: none;">Stop</button>
+                <button type="submit" class="btn primary btn-sm" id="btn-send">Send</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bottom">
+    <div class="footer-wrap">
+      <p>Data from NASA's Mars Science Laboratory and Mars 2020 exploration programs.</p>
+      <p><a href="/api/docs" id="footer-docs-link">API Documentation</a> &bull; Space Explorer</p>
+    </div>
+  </footer>
+
+  <script src="js/sky.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/lab.js"></script>
+  <script src="js/assistant.js"></script>
+</body>
+</html>
+
