@@ -1,0 +1,524 @@
+/* Space Explorer - Mars Image Explorer styles */
+
+.path-b-notice {
+  margin-top: 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid var(--aurora);
+  background: rgba(14, 19, 52, 0.7);
+}
+
+.mars-head {
+  padding-top: 12px;
+  margin-bottom: 32px;
+}
+
+/* ---------- Rover Picker ---------- */
+
+.rover-picker-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-bottom: 20px;
+}
+
+.rover-tabs {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rover-tab {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--dust);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  transition: color 0.2s, background 0.2s, transform 0.15s;
+  flex: 1;
+  min-width: 140px;
+  text-align: left;
+}
+
+.rover-tab:hover {
+  color: var(--starlight);
+  background: rgba(160, 175, 255, 0.08);
+}
+
+.rover-tab.active,
+.rover-tab[aria-selected="true"] {
+  color: var(--starlight);
+  background: rgba(106, 77, 244, 0.2);
+  border-bottom: 2px solid var(--aurora);
+}
+
+.tab-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.tab-meta {
+  font-size: 0.8rem;
+  color: var(--dust);
+}
+
+.rover-tab.active .tab-meta {
+  color: var(--aurora);
+}
+
+.rover-info {
+  padding-top: 14px;
+}
+
+.rover-blurb {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--dust);
+  line-height: 1.5;
+}
+
+/* ---------- Search Controls ---------- */
+
+.search-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-input-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.search-input-row .btn.primary {
+  height: 44px;
+}
+
+.keywords-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+
+.keywords-label {
+  color: var(--dust);
+  font-weight: 500;
+}
+
+.chip-btn {
+  background: rgba(10, 14, 42, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  color: var(--starlight);
+  font: 500 0.85rem var(--font-body);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.chip-btn:hover {
+  border-color: var(--aurora);
+  background: rgba(56, 225, 198, 0.12);
+}
+
+.chip-btn.active {
+  background: var(--aurora);
+  color: #05071a;
+  border-color: var(--aurora);
+}
+
+/* ---------- Layout (Gallery + Sky Panel) ---------- */
+
+.mars-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1.15fr);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 64px;
+}
+
+.gallery-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 18px;
+}
+
+.gallery-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.gallery-count {
+  font-size: 0.9rem;
+  color: var(--dust);
+}
+
+/* Photo Gallery Grid */
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.card-skel {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm);
+}
+
+.photo-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.photo-card:hover, .photo-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--aurora);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.photo-thumb-box {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.photo-card:hover .photo-thumb {
+  transform: scale(1.05);
+}
+
+.photo-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.photo-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--starlight);
+  line-height: 1.25;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.photo-meta {
+  font-size: 0.8rem;
+  color: var(--dust);
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.load-more-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+/* ---------- Sky That Day Side Panel ---------- */
+
+.sky-panel {
+  position: sticky;
+  top: 96px;
+}
+
+.sky-day-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sky-prompt {
+  font-size: 0.92rem;
+  color: var(--dust);
+  line-height: 1.5;
+  margin: 0;
+  padding: 20px 14px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.sky-day-date {
+  font-size: 0.95rem;
+  color: var(--aurora);
+  font-weight: 600;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sky-card {
+  background: rgba(10, 14, 42, 0.65);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.sky-card:last-child {
+  margin-bottom: 0;
+}
+
+.sky-card-label {
+  font-size: 0.82rem;
+  color: var(--dust);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.sky-apod-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  object-fit: cover;
+  margin-bottom: 8px;
+  background: #000;
+}
+
+.sky-card h4 {
+  font-size: 1rem;
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+
+.sky-card p {
+  font-size: 0.88rem;
+  color: var(--dust);
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+
+.sky-link {
+  color: var(--ember);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-block;
+}
+
+.sky-error-note {
+  color: var(--dust);
+  font-style: italic;
+  font-size: 0.86rem;
+}
+
+/* ---------- Lightbox Modal Dialog ---------- */
+
+.lightbox-dialog:not([open]) {
+  display: none !important;
+}
+
+.lightbox-dialog[open] {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(92vw, 940px);
+  max-height: 92vh;
+  background: #080c26;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--starlight);
+  padding: 0;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.lightbox-dialog::backdrop {
+  background: rgba(5, 7, 26, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.lightbox-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: 92vh;
+}
+
+.lightbox-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.lightbox-heading {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.lightbox-sub {
+  font-size: 0.88rem;
+  color: var(--aurora);
+}
+
+.lightbox-media {
+  flex: 1;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  max-height: 62vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.lightbox-media img {
+  max-width: 100%;
+  max-height: 62vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.lightbox-img-fallback {
+  color: var(--dust);
+  padding: 32px;
+  text-align: center;
+}
+
+.lightbox-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.lightbox-nav-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.photo-counter {
+  font-size: 0.88rem;
+  color: var(--dust);
+  font-weight: 500;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 960px) {
+  .mars-layout {
+    grid-template-columns: 1fr;
+  }
+  .sky-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .rover-tabs {
+    gap: 8px;
+  }
+  .rover-tab {
+    min-width: 110px;
+    padding: 8px 12px;
+  }
+  .tab-name {
+    font-size: 1rem;
+  }
+  .lightbox-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lightbox-nav-btns {
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-card, .photo-thumb {
+    transition: none !important;
+  }
+}
+
