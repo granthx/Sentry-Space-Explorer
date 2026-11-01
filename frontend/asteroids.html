@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asteroid Tracker - Space Explorer</title>
+  <meta name="description" content="Track near-Earth asteroids, view distance radars, and inspect orbital trajectories using NASA NeoWs data.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Figtree:wght@400;500;600&family=Share+Tech+Mono&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/asteroids.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body class="hud-mode">
+  <a class="skip" href="#tracker-main">Skip to asteroid tracker</a>
+
+  <!-- Ambient Retro CRT Scanlines & Phosphor Texture -->
+  <div class="hud-scanlines" aria-hidden="true"></div>
+  <div class="nebula" aria-hidden="true"></div>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/">Today's sky</a>
+      <a href="/asteroids.html" class="active">Asteroids</a>
+      <a href="/mars.html">Mars</a>
+      <a href="/lab.html">Data Lab</a>
+      <a href="/#modules">Modules</a>
+      <a href="#status" class="status-link"><span class="dot" id="nav-dot" data-state="checking"></span><span id="nav-status">Checking backend</span></a>
+    </nav>
+  </header>
+
+  <main id="tracker-main">
+    <!-- Offline alert -->
+    <div id="offline-alert" class="notice offline-notice" style="display: none;" role="alert">
+      <h3>The backend isn't running</h3>
+      <p>In a terminal, open the backend folder and run: <code>uvicorn app.main:app --reload</code>. Then refresh this page.</p>
+    </div>
+
+    <!-- Tactical Mission Control Header -->
+    <section class="hud-status-bar" aria-label="Tactical Mission Telemetry">
+      <div class="hud-bar-left">
+        <span class="hud-pulse-tag"><span class="hud-pulse-led"></span> SENTRY // ACTIVE</span>
+        <span class="hud-title">NEAR-EARTH OBJECT ENCOUNTERS</span>
+        <span class="hud-source">SRC: JPL CNEOS · NASA SSD · NeoWs</span>
+      </div>
+      <div class="hud-bar-right">
+        <div class="hud-telemetry-item">
+          <span class="hud-telemetry-lbl">MISSION TIME:</span>
+          <span class="hud-telemetry-val" id="hud-clock">---- -- -- --:--:--Z</span>
+        </div>
+        <button type="button" class="hud-btn-synth" id="hud-audio-toggle" aria-label="Toggle retro synth audio">
+          <span class="hud-synth-icon">◩</span> <span id="hud-audio-text">AUDIO: SYNTH [OFF]</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Page Header & Controls -->
+    <section class="tracker-head">
+      <div class="section-head hud-section-head">
+        <div class="hud-sector-tag">// SECTOR DEFENSE // 7-DAY ENCOUNTER CORRIDOR</div>
+        <h1>Asteroid tracker</h1>
+        <p>Near-Earth objects passing Earth in any chosen 7-day window, plotted by size, speed and distance.</p>
+      </div>
+
+      <form id="window-form" class="controls-card hud-controls" onsubmit="return false;">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+        <div class="inputs-row">
+          <label class="field">
+            <span>Start date</span>
+            <input type="date" id="start-date" required>
+          </label>
+          <label class="field">
+            <span>End date</span>
+            <input type="date" id="end-date" required>
+          </label>
+          <button type="submit" class="btn primary" id="btn-update">Update</button>
+        </div>
+
+        <div class="presets-row">
+          <span class="presets-label">Presets:</span>
+          <button type="button" class="btn small ghost" data-preset="this-week">This week</button>
+          <button type="button" class="btn small ghost" data-preset="next-7">Next 7 days</button>
+          <button type="button" class="btn small ghost" data-preset="last-7">Last 7 days</button>
+        </div>
+
+        <div id="client-validation-error" class="validation-msg" role="alert" aria-live="polite" style="display: none;"></div>
+      </form>
+    </section>
+
+    <!-- Error container -->
+    <div id="error-container" class="notice tracker-error" role="alert" style="display: none;">
+      <h3 id="error-title">Could not load asteroid data</h3>
+      <p id="error-body"></p>
+      <button type="button" class="btn small" id="btn-retry">Try again</button>
+    </div>
+
+    <!-- Summary Tiles -->
+    <section class="summary-section" aria-label="Summary of current window">
+      <div class="tiles-grid" id="summary-tiles">
+        <div class="tile skeleton"></div>
+        <div class="tile skeleton"></div>
+        <div class="tile skeleton"></div>
+        <div class="tile skeleton"></div>
+        <div class="tile skeleton"></div>
+      </div>
+    </section>
+
+    <!-- Mission Time Scrubber Playback Control (Phase C) -->
+    <section class="scrubber-section" aria-label="Mission encounter timeline playback">
+      <div class="panel-box scrubber-box hud-panel">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+
+        <div class="scrubber-head">
+          <div class="scrubber-head-left">
+            <div class="hud-panel-tag">[ 4D MISSION TIMELINE // TRAJECTORY PLAYBACK ]</div>
+            <h2 class="scrubber-title">Encounter Timeline Scrubber</h2>
+          </div>
+          <div class="scrubber-telemetry" id="scrubber-telemetry">
+            <span class="scrub-status-badge" id="scrub-status-badge">STANDBY</span>
+            <span class="scrub-tele-sep">·</span>
+            <span class="scrub-tele-item">SIM T: <strong id="scrub-time-display">----/--/-- --:--:-- UTC</strong></span>
+            <span class="scrub-tele-sep">·</span>
+            <span class="scrub-tele-item">CLOSEST: <strong id="scrub-closest-name">--</strong> (<span id="scrub-closest-dist">--</span>)</span>
+            <span class="scrub-tele-sep">·</span>
+            <span class="scrub-tele-item" id="scrub-countdown">T-00:00:00</span>
+          </div>
+        </div>
+
+        <div class="scrubber-interface">
+          <div class="scrubber-actions">
+            <button type="button" class="hud-tool-btn scrub-action-btn primary" id="btn-scrub-play" aria-label="Play or pause time simulation">
+              <span id="scrub-play-icon">▶</span> <span id="scrub-play-text">PLAY</span>
+            </button>
+            <button type="button" class="hud-tool-btn scrub-action-btn" id="btn-scrub-speed" title="Cycle simulation speed (1x / 5x / 20x)">1x</button>
+            <button type="button" class="hud-tool-btn scrub-action-btn" id="btn-scrub-start" title="Rewind to start of window">↺ T-0</button>
+            <button type="button" class="hud-tool-btn scrub-action-btn" id="btn-scrub-now" title="Snap to current UTC time">NOW</button>
+          </div>
+
+          <div class="scrubber-timeline-wrap">
+            <div class="scrubber-timeline-ticks" id="scrubber-markers-bar"></div>
+            <div class="scrubber-slider-container">
+              <span class="scrub-edge-label" id="scrub-start-label">--</span>
+              <div class="scrub-slider-shell">
+                <input type="range" id="scrubber-slider" class="hud-range-slider" min="0" max="1000" value="0" step="1" aria-label="Simulation time scrubber">
+                <div class="scrub-progress-fill" id="scrubber-progress-fill" style="width: 0%;"></div>
+              </div>
+              <span class="scrub-edge-label" id="scrub-end-label">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visualizations: Radar & Chart -->
+    <section class="visuals-section" aria-label="Visualizations">
+      <!-- Radar -->
+      <div class="panel-box radar-box hud-panel">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+        <div class="panel-head">
+          <div class="hud-panel-head-row">
+            <div>
+              <div class="hud-panel-tag">[ RADAR // 360° POLAR PROXIMITY GRID ]</div>
+              <h2>Distance radar</h2>
+            </div>
+            <div class="radar-scan-badge">
+              <span class="radar-scan-dot"></span>
+              <span class="radar-scan-text">SWEEP: 360° ACTIVE</span>
+            </div>
+          </div>
+          <p>Concentric rings in Lunar Distances (1 LD ≈ 384,400 km). Rotating phosphor beam scans sky sector at 4.5s/rev. Earth at center.</p>
+        </div>
+        <div class="radar-container" id="radar-container">
+          <div class="skeleton radar-skel"></div>
+        </div>
+        <div class="radar-legend">
+          <span class="legend-item"><span class="legend-dot safe"></span> Standard NEO</span>
+          <span class="legend-item"><span class="legend-dot hazard"></span> Potentially Hazardous</span>
+          <span class="legend-item"><span class="legend-ring"></span> Moon's Orbit (1 LD)</span>
+        </div>
+      </div>
+
+      <!-- 3D Geocentric Vector Globe & Scatter Chart Panel -->
+      <div class="panel-box chart-box hud-panel">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+        <div class="panel-head hud-chart-head">
+          <div>
+            <div class="hud-panel-tag" id="vis-panel-tag">[ GEOCENTRIC // 3D VECTOR ORBIT MAP ]</div>
+            <h2 id="vis-panel-title">3D Geocentric Vector Map</h2>
+            <p id="vis-panel-desc">Interactive wireframe Earth with flyby trajectory vectors, Moon orbit (1 LD), and Low Earth Orbit satellite swarms.</p>
+          </div>
+          <div class="hud-vis-toggle" role="group" aria-label="Visualization mode">
+            <button type="button" class="hud-view-btn active" id="btn-view-globe" aria-pressed="true">
+              <span>◉ 3D Globe</span>
+            </button>
+            <button type="button" class="hud-view-btn" id="btn-view-chart" aria-pressed="false">
+              <span>◰ Scatter Chart</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D Globe View -->
+        <div class="globe-view-wrap" id="globe-view-wrap">
+          <div class="globe-container" id="globe-container"></div>
+          <div class="globe-toolbar">
+            <span class="globe-hint">Drag: Rotate · Scroll: Zoom</span>
+            <div class="globe-actions">
+              <button type="button" class="hud-tool-btn" id="btn-globe-reset" title="Reset Camera">Reset</button>
+              <button type="button" class="hud-tool-btn active" id="btn-globe-spin" title="Toggle Auto Rotation">Spin</button>
+              <button type="button" class="hud-tool-btn active" id="btn-globe-moon" title="Toggle Moon Orbit">Moon</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scatter Chart Container -->
+        <div class="chart-container" id="chart-container" style="display: none;">
+          <canvas id="scatter-chart" aria-label="Scatter chart of asteroid size versus speed" role="img"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Telemetry Downlink Feed Terminal (Phase D) -->
+    <section class="telemetry-section" aria-label="Live NASA CNEOS Downlink Feed">
+      <div class="panel-box telemetry-box hud-panel">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+
+        <div class="telemetry-panel-head">
+          <div class="telemetry-head-left">
+            <span class="telemetry-carrier-tag"><span class="hud-pulse-led"></span> CNEOS DOWNLINK // STREAM 08-B</span>
+            <span class="telemetry-baud">9600 BAUD · SPK KERNEL SYNCED</span>
+          </div>
+          <div class="telemetry-head-actions">
+            <button type="button" class="hud-tool-btn" id="btn-telemetry-scroll" title="Toggle automatic scroll">AUTO-SCROLL: [ON]</button>
+            <button type="button" class="hud-tool-btn" id="btn-telemetry-pause" title="Pause or resume downlink stream">STREAM: [LIVE]</button>
+            <button type="button" class="hud-tool-btn" id="btn-telemetry-clear" title="Clear console buffer">CLEAR</button>
+          </div>
+        </div>
+
+        <div class="telemetry-terminal-log" id="telemetry-terminal-log" role="log" aria-live="polite" aria-atomic="false">
+          <!-- Live downlinked telemetry packets stream here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Sortable Table -->
+    <section class="table-section" aria-label="List of near-Earth objects">
+      <div class="panel-box table-box hud-panel">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+        <div class="panel-head">
+          <div class="hud-panel-tag">[ ENCOUNTER MANIFEST // SORTABLE ROSTER ]</div>
+          <h2>All objects in window</h2>
+          <p>Click any column to sort. Select any row to inspect close approach history and orbital parameters.</p>
+        </div>
+        <div class="table-responsive">
+          <table class="asteroids-table" id="asteroids-table">
+            <thead>
+              <tr>
+                <th scope="col"><button type="button" class="th-btn" data-col="name" aria-sort="none">Name <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                <th scope="col"><button type="button" class="th-btn" data-col="date" aria-sort="none">Date <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                <th scope="col"><button type="button" class="th-btn active" data-col="miss_lunar" aria-sort="ascending">Distance (LD) <span class="sort-icon" aria-hidden="true">↑</span></button></th>
+                <th scope="col"><button type="button" class="th-btn" data-col="diameter_m_avg" aria-sort="none">Diameter (m) <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                <th scope="col"><button type="button" class="th-btn" data-col="velocity_kms" aria-sort="none">Speed (km/s) <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+                <th scope="col"><button type="button" class="th-btn" data-col="hazardous" aria-sort="none">Hazard <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="6" class="skeleton line" style="height: 48px;"></td></tr>
+              <tr><td colspan="6" class="skeleton line" style="height: 48px;"></td></tr>
+              <tr><td colspan="6" class="skeleton line" style="height: 48px;"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <p>No near-Earth objects in this window. Try a different week.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Detail Drawer Dialog -->
+  <dialog id="asteroid-drawer" class="drawer hud-drawer" aria-labelledby="drawer-title" aria-modal="true">
+    <div class="hud-corner-bracket top-left"></div>
+    <div class="hud-corner-bracket top-right"></div>
+    <div class="hud-corner-bracket bottom-left"></div>
+    <div class="hud-corner-bracket bottom-right"></div>
+    <div class="hud-scanner-bar" aria-hidden="true"></div>
+    <div class="drawer-header hud-drawer-header">
+      <div>
+        <div class="hud-drawer-tag">[ TARGET IDENTIFICATION // SBDB ]</div>
+        <h2 id="drawer-title" class="drawer-heading">Asteroid details</h2>
+        <span id="drawer-subtitle" class="drawer-sub">Loading...</span>
+      </div>
+      <button type="button" id="drawer-close" class="btn small ghost close-btn" aria-label="Close asteroid details">✕</button>
+    </div>
+
+    <div class="drawer-body" id="drawer-content">
+      <div class="skeleton line w60"></div>
+      <div class="skeleton line"></div>
+      <div class="skeleton line"></div>
+    </div>
+  </dialog>
+
+  <!-- Footer / Status -->
+  <footer class="foot" id="status">
+    <div class="foot-grid">
+      <div>
+        <h2 class="foot-title">System status</h2>
+        <dl class="status-list" id="status-list">
+          <div><dt>Backend</dt><dd id="st-backend">Checking</dd></div>
+          <div><dt>NASA key</dt><dd id="st-key">-</dd></div>
+          <div><dt>Requests left this hour</dt><dd id="st-rate">-</dd></div>
+          <div><dt>Build phase</dt><dd id="st-phase">-</dd></div>
+        </dl>
+      </div>
+      <div class="foot-note">
+        <p>Asteroid orbital and approach data provided by NASA's Center for Near-Earth Object Studies (CNEOS) via the NeoWs API.</p>
+        <p><a href="/api/docs" id="docs-link">Open the API reference</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/sky.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/globe3d.js"></script>
+  <script src="js/asteroids.js"></script>
+</body>
+</html>
+
