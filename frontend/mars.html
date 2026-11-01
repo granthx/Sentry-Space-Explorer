@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mars Image Explorer - Space Explorer</title>
+  <meta name="description" content="Explore Martian photography from Curiosity, Perseverance, Spirit, and Opportunity through NASA's imagery database.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/mars.css">
+</head>
+<body>
+  <a class="skip" href="#mars-main">Skip to Mars explorer</a>
+
+  <div class="nebula" aria-hidden="true"></div>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/">Today's sky</a>
+      <a href="/asteroids.html">Asteroids</a>
+      <a href="/mars.html" class="active">Mars</a>
+      <a href="/lab.html">Data Lab</a>
+      <a href="/#modules">Modules</a>
+      <a href="#status" class="status-link"><span class="dot" id="nav-dot" data-state="checking"></span><span id="nav-status">Checking backend</span></a>
+    </nav>
+  </header>
+
+  <main id="mars-main">
+    <!-- Offline alert -->
+    <div id="offline-alert" class="notice offline-notice" style="display: none;" role="alert">
+      <h3>The backend isn't running</h3>
+      <p>In a terminal, open the backend folder and run: <code>uvicorn app.main:app --reload</code>. Then refresh this page.</p>
+    </div>
+
+    <!-- Data source notice -->
+    <div class="notice path-b-notice" role="note">
+      <p><strong>Data Source Note:</strong> Showing images from the NASA Image and Video Library. Browsing by sol is unavailable right now as NASA's legacy rover photo service is offline.</p>
+    </div>
+
+    <!-- Header & Rover Picker -->
+    <section class="mars-head">
+      <div class="section-head">
+        <h1>Mars Image Explorer</h1>
+        <p>Browse high-resolution photographs taken by robotic explorers on the surface of Mars, paired with what was visible in the sky on the same Earth day.</p>
+      </div>
+
+      <!-- Rover tabs (accessible tablist) -->
+      <div class="rover-picker-card">
+        <div class="rover-tabs" role="tablist" aria-label="Mars Rovers" id="rover-tabs">
+          <button type="button" role="tab" class="rover-tab active" id="tab-curiosity" data-rover="curiosity" aria-selected="true" aria-controls="rover-panel">
+            <span class="tab-name">Curiosity</span>
+            <span class="tab-meta">Active • 2012</span>
+          </button>
+          <button type="button" role="tab" class="rover-tab" id="tab-perseverance" data-rover="perseverance" aria-selected="false" aria-controls="rover-panel">
+            <span class="tab-name">Perseverance</span>
+            <span class="tab-meta">Active • 2021</span>
+          </button>
+          <button type="button" role="tab" class="rover-tab" id="tab-opportunity" data-rover="opportunity" aria-selected="false" aria-controls="rover-panel">
+            <span class="tab-name">Opportunity</span>
+            <span class="tab-meta">Retired • 2004</span>
+          </button>
+          <button type="button" role="tab" class="rover-tab" id="tab-spirit" data-rover="spirit" aria-selected="false" aria-controls="rover-panel">
+            <span class="tab-name">Spirit</span>
+            <span class="tab-meta">Retired • 2004</span>
+          </button>
+        </div>
+
+        <div id="rover-panel" role="tabpanel" aria-labelledby="tab-curiosity" class="rover-info">
+          <p id="rover-blurb" class="rover-blurb">Loading rover details...</p>
+        </div>
+      </div>
+
+      <!-- Search Controls & Keywords -->
+      <form id="search-form" class="search-card" onsubmit="return false;">
+        <div class="search-input-row">
+          <label class="field search-field">
+            <span>Keywords</span>
+            <input type="text" id="search-input" placeholder="e.g. selfie, panorama, drill, crater, sky..." maxlength="80">
+          </label>
+          <button type="submit" class="btn primary" id="btn-search">Search</button>
+          <button type="button" class="btn ghost" id="btn-clear">Clear</button>
+        </div>
+
+        <div class="keywords-row">
+          <span class="keywords-label">Suggestions:</span>
+          <button type="button" class="chip-btn" data-kw="selfie">selfie</button>
+          <button type="button" class="chip-btn" data-kw="panorama">panorama</button>
+          <button type="button" class="chip-btn" data-kw="drill">drill</button>
+          <button type="button" class="chip-btn" data-kw="sunset">sunset</button>
+          <button type="button" class="chip-btn" data-kw="wheel">wheel</button>
+          <button type="button" class="chip-btn" data-kw="Jezero">Jezero</button>
+          <button type="button" class="chip-btn" data-kw="Gale crater">Gale crater</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Content Layout: Gallery + Sky Panel -->
+    <div class="mars-layout">
+      <!-- Gallery Column -->
+      <section class="gallery-section" aria-label="Mars photo gallery">
+        <div class="gallery-head">
+          <h2 id="gallery-title">Photos</h2>
+          <span id="gallery-count" class="gallery-count" aria-live="polite">Searching...</span>
+        </div>
+
+        <div id="error-container" class="notice mars-error" role="alert" style="display: none;">
+          <h3 id="error-title">Could not load images</h3>
+          <p id="error-body"></p>
+          <button type="button" class="btn small" id="btn-retry">Try again</button>
+        </div>
+
+        <div class="gallery-grid" id="gallery-grid" aria-live="polite">
+          <div class="card-skel skeleton"></div>
+          <div class="card-skel skeleton"></div>
+          <div class="card-skel skeleton"></div>
+          <div class="card-skel skeleton"></div>
+          <div class="card-skel skeleton"></div>
+          <div class="card-skel skeleton"></div>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <p>No Mars images found for this query. Try different keywords or another rover.</p>
+        </div>
+
+        <div class="load-more-row" id="load-more-container" style="display: none;">
+          <button type="button" class="btn" id="btn-load-more">Load more photos</button>
+          <span id="live-announcer" class="sr-only" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <!-- The Sky That Day Side Panel -->
+      <aside class="sky-panel" aria-labelledby="sky-day-heading">
+        <div class="panel-box sky-day-box">
+          <div class="panel-head">
+            <h2 id="sky-day-heading">The Sky That Day</h2>
+            <p id="sky-day-subtitle">What was happening in the sky on this photo's Earth date.</p>
+          </div>
+
+          <div id="sky-day-content" class="sky-day-content">
+            <p class="sky-prompt">Select any photo in the gallery to inspect the sky and asteroid passes for that Earth date.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Lightbox Modal Dialog -->
+  <dialog id="photo-lightbox" class="lightbox-dialog" aria-labelledby="lightbox-title" aria-modal="true">
+    <div class="lightbox-frame">
+      <div class="lightbox-header">
+        <div>
+          <h2 id="lightbox-title" class="lightbox-heading">Photo details</h2>
+          <span id="lightbox-date" class="lightbox-sub"></span>
+        </div>
+        <button type="button" id="lightbox-close" class="btn small ghost close-btn" aria-label="Close photo lightbox">✕</button>
+      </div>
+
+      <div class="lightbox-media" id="lightbox-media">
+        <img id="lightbox-img" src="" alt="Mars Rover Photograph" loading="eager" decoding="async">
+        <div id="lightbox-error" class="lightbox-img-fallback" style="display: none;">
+          <p>Full-size image could not be loaded directly.</p>
+        </div>
+      </div>
+
+      <div class="lightbox-footer">
+        <div class="lightbox-nav-btns">
+          <button type="button" class="btn small ghost" id="btn-prev-photo" aria-label="Previous photograph">← Previous</button>
+          <span id="photo-counter" class="photo-counter"></span>
+          <button type="button" class="btn small ghost" id="btn-next-photo" aria-label="Next photograph">Next →</button>
+        </div>
+        <div class="lightbox-actions">
+          <a id="lightbox-orig-link" class="btn small primary" href="#" target="_blank" rel="noopener">Open original image ↗</a>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Footer / Status -->
+  <footer class="foot" id="status">
+    <div class="foot-grid">
+      <div>
+        <h2 class="foot-title">System status</h2>
+        <dl class="status-list" id="status-list">
+          <div><dt>Backend</dt><dd id="st-backend">Checking</dd></div>
+          <div><dt>NASA key</dt><dd id="st-key">-</dd></div>
+          <div><dt>Requests left this hour</dt><dd id="st-rate">-</dd></div>
+          <div><dt>Build phase</dt><dd id="st-phase">-</dd></div>
+        </dl>
+      </div>
+      <div class="foot-note">
+        <p>Mars imagery and metadata provided by NASA and Jet Propulsion Laboratory (JPL) via the NASA Image and Video Library.</p>
+        <p><a href="/api/docs" id="docs-link">Open the API reference</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/sky.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/mars.js"></script>
+</body>
+</html>
+
