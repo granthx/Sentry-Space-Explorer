@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Space Explorer</title>
+  <meta name="description" content="Explore near-Earth asteroids, Mars rover photos and mission data from NASA's open APIs.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#sky-today">Skip to today's sky</a>
+
+  <div class="nebula" aria-hidden="true"></div>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <header class="top">
+    <a class="brand" href="#top" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="#sky-today">Today's sky</a>
+      <a href="/asteroids.html">Asteroids</a>
+      <a href="/mars.html">Mars</a>
+      <a href="/lab.html">Data Lab</a>
+      <a href="#modules">Modules</a>
+      <a href="#status" class="status-link"><span class="dot" id="nav-dot" data-state="checking"></span><span id="nav-status">Checking backend</span></a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <h1>Near space and Mars, <br>straight from NASA's data.</h1>
+      <p class="lead">Track asteroids passing Earth, browse photographs taken by rovers on Mars, and ask questions about the missions in plain language.</p>
+      <div class="actions">
+        <a class="btn primary" href="#sky-today">See today's sky</a>
+        <a class="btn ghost" href="#modules">View the modules</a>
+      </div>
+    </section>
+
+    <section class="sky-today" id="sky-today" aria-labelledby="apod-heading">
+      <div class="section-head">
+        <h2 id="apod-heading">Today's sky</h2>
+        <p>NASA's Astronomy Picture of the Day, with the explanation written by an astronomer.</p>
+      </div>
+
+      <div class="apod-controls">
+        <label class="field">
+          <span>Pick a date</span>
+          <input type="date" id="apod-date" min="1995-06-16">
+        </label>
+        <button type="button" class="btn small" id="apod-latest">Latest</button>
+        <button type="button" class="btn small" id="apod-random">Show a random day</button>
+      </div>
+
+      <div class="apod" id="apod" aria-live="polite" aria-busy="true">
+        <div class="apod-media skeleton" role="img" aria-label="Loading picture"></div>
+        <div class="apod-text">
+          <div class="skeleton line w60"></div>
+          <div class="skeleton line w30"></div>
+          <div class="skeleton line"></div>
+          <div class="skeleton line"></div>
+          <div class="skeleton line w80"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="modules" id="modules" aria-labelledby="modules-heading">
+      <div class="section-head">
+        <h2 id="modules-heading">Three ways to explore</h2>
+        <p>Each module opens as its phase is built. They share one backend, so what you learn in one carries into the next.</p>
+      </div>
+      <ul class="module-grid" id="module-grid">
+        <li class="skeleton card-skel"></li>
+        <li class="skeleton card-skel"></li>
+        <li class="skeleton card-skel"></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="foot" id="status">
+    <div class="foot-grid">
+      <div>
+        <h2 class="foot-title">System status</h2>
+        <dl class="status-list" id="status-list">
+          <div><dt>Backend</dt><dd id="st-backend">Checking</dd></div>
+          <div><dt>NASA key</dt><dd id="st-key">-</dd></div>
+          <div><dt>Requests left this hour</dt><dd id="st-rate">-</dd></div>
+          <div><dt>Build phase</dt><dd id="st-phase">-</dd></div>
+        </dl>
+        <button type="button" class="btn small" id="check-nasa">Check NASA services</button>
+        <ul class="upstream" id="upstream" aria-live="polite"></ul>
+      </div>
+      <div class="foot-note">
+        <p>Imagery and data belong to NASA and its partners. This is an independent project and is not endorsed by NASA.</p>
+        <p><a href="/api/docs" id="docs-link">Open the API reference</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/sky.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
