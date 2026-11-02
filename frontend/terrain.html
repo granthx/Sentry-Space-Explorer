@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mars Terrain Segmentation — Space Explorer</title>
+  <meta name="description" content="Pixel-level terrain segmentation of Mars rover images into soil, bedrock, sand and big rocks.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/terrain.css">
+</head>
+<body>
+  <div class="nebula" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/asteroids.html">Asteroids</a>
+      <a href="/mars.html">Mars</a>
+      <a href="/lab.html">Data Lab</a>
+      <a href="/exoplanets.html">Exoplanets</a>
+      <a href="/terrain.html" aria-current="page">Terrain</a>
+      <a href="/anomaly.html">Anomaly</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <h1>Mars Terrain Segmentation</h1>
+        <p class="lead">A segmentation model labels every pixel of Curiosity's camera images as soil, bedrock, sand or big rock — so a rover knows where it can drive safely. NASA's Spirit rover got stuck in soft sand in 2009 and never moved again.</p>
+      </div>
+    </section>
+
+    <section class="terrain-controls card-section">
+      <div class="inner">
+        <h2>Analyse an image</h2>
+
+        <div class="terrain-form">
+          <label class="field full-field">
+            <span>Mars image URL</span>
+            <input type="url" id="img-url" placeholder="https://mars.nasa.gov/…/NLB_….JPG">
+          </label>
+          <div class="terrain-sample-chips">
+            <span class="chip-label">Try a sample:</span>
+            <button class="chip" data-url="https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/04073/opgs/edr/ncam/NLB_775082924EDR_F1061318NCAM00354M_.JPG" type="button">Sol 4073 NavCam</button>
+          </div>
+          <div class="terrain-actions">
+            <button class="btn primary" id="segment-btn" type="button">Segment terrain</button>
+            <label class="upload-label btn ghost">
+              Upload image
+              <input type="file" id="img-upload" accept="image/*" hidden>
+            </label>
+          </div>
+        </div>
+
+        <div id="terrain-loading" class="loading-row" hidden>
+          <span class="spinner" aria-label="Loading"></span>
+          <span>Running segmentation…</span>
+        </div>
+        <div id="terrain-error" class="error-banner" hidden></div>
+
+        <div id="terrain-result" class="terrain-result" hidden>
+          <div class="canvases">
+            <div class="canvas-wrap">
+              <p class="canvas-label">Original</p>
+              <canvas id="orig-canvas" width="256" height="256"></canvas>
+            </div>
+            <div class="canvas-wrap">
+              <p class="canvas-label">Segmentation overlay</p>
+              <canvas id="seg-canvas" width="256" height="256"></canvas>
+            </div>
+          </div>
+          <div class="terrain-stats" id="terrain-stats"></div>
+          <div class="terrain-legend" id="terrain-legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <div class="inner">
+        <h2>About AI4Mars</h2>
+        <p>The model was trained on the <strong>AI4Mars</strong> dataset published by NASA's Jet Propulsion Laboratory. Thousands of volunteers labelled Curiosity rover images on Zooniverse, assigning every pixel to one of four terrain classes. The resulting dataset is used by NASA to train autonomous driving algorithms for future rovers.</p>
+        <div class="class-grid" id="class-grid">
+          <div class="class-card" style="--accent:#deb887"><strong>Soil</strong><span>Safe to drive · loose fine material</span></div>
+          <div class="class-card" style="--accent:#8b7d6b"><strong>Bedrock</strong><span>Safe to drive · exposed rock</span></div>
+          <div class="class-card" style="--accent:#d2b48c"><strong>Sand</strong><span>Traction risk · soft grains</span></div>
+          <div class="class-card" style="--accent:#695c4e"><strong>Big Rock</strong><span>Obstacle · Spirit got stuck</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-grid">
+      <div>
+        <p>Imagery courtesy of NASA/JPL-Caltech. AI4Mars dataset licensed under the NASA Open Data Portal. Not affiliated with or endorsed by NASA.</p>
+        <p><a href="/api/docs">Open the API reference</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/terrain.js"></script>
+</body>
+</html>
+
