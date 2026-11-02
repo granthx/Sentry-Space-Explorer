@@ -1,0 +1,202 @@
+/* ── Exoplanet Finder page styles ──────────────────────────────── */
+
+.exo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.field-row .field {
+  flex: 1 1 200px;
+}
+
+.sample-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip-label {
+  font-size: 0.8rem;
+  color: var(--text-muted, #8899bb);
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border-radius: 999px;
+  color: var(--text, #d0dff8);
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.75rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.chip:hover,
+.chip:focus-visible {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* Result panel */
+.exo-result {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+}
+
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.result-badge.planet  { color: #60d394; }
+.result-badge.fp      { color: #ff8c69; }
+
+.result-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted, #8899bb);
+  margin-bottom: 1rem;
+}
+
+.chart-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#flux-chart {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.chart-caption {
+  font-size: 0.75rem;
+  color: var(--text-muted, #8899bb);
+  margin-top: 0.4rem;
+  text-align: center;
+}
+
+/* Loading / error */
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  color: var(--text-muted, #8899bb);
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-banner {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 8px;
+  color: #ff9999;
+  font-size: 0.88rem;
+}
+
+/* Page hero (shared across ML pages) */
+.page-hero {
+  padding: 4rem 1.5rem 2.5rem;
+}
+
+.page-hero-inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.page-hero h1 {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+
+.page-hero .lead {
+  color: var(--text-muted, #8899bb);
+  line-height: 1.65;
+  max-width: 60ch;
+}
+
+/* Card section */
+.card-section {
+  padding: 0 1.5rem 2.5rem;
+}
+
+.card-section .inner {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.card-section h2 {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Info section */
+.info-section {
+  padding: 2.5rem 1.5rem;
+  background: rgba(255,255,255,0.015);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.info-section .inner {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.info-section h2 {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.steps {
+  padding-left: 1.25rem;
+  line-height: 1.8;
+  color: var(--text-muted, #8899bb);
+}
+
+.steps li { margin-bottom: 0.4rem; }
+.steps strong { color: var(--text, #d0dff8); }
+
+.footnote {
+  margin-top: 1rem;
+  font-size: 0.83rem;
+  color: var(--text-muted, #8899bb);
+  border-left: 2px solid rgba(255,255,255,0.15);
+  padding-left: 0.75rem;
+}
+

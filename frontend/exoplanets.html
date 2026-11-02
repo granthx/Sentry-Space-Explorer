@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exoplanet Finder — Space Explorer</title>
+  <meta name="description" content="Classify Kepler light curves as planetary transits or false positives using a 1-D CNN trained on NASA data.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/exoplanets.css">
+</head>
+<body>
+  <div class="nebula" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/asteroids.html">Asteroids</a>
+      <a href="/mars.html">Mars</a>
+      <a href="/lab.html">Data Lab</a>
+      <a href="/exoplanets.html" aria-current="page">Exoplanets</a>
+      <a href="/terrain.html">Terrain</a>
+      <a href="/anomaly.html">Anomaly</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <h1>Exoplanet Finder</h1>
+        <p class="lead">When a planet crosses in front of its star, the star dims by a tiny fraction. A 1-D CNN reads NASA Kepler light curves and learns to separate a real planet's dip from look-alikes like eclipsing binaries — the same approach Google researchers used to discover Kepler-90i.</p>
+      </div>
+    </section>
+
+    <section class="exo-controls card-section">
+      <div class="inner">
+        <h2>Run a prediction</h2>
+        <div class="exo-form">
+          <div class="field-row">
+            <label class="field">
+              <span>Kepler Input Catalog ID</span>
+              <input type="number" id="kepid-input" value="11442793" min="1" step="1" placeholder="e.g. 11442793">
+            </label>
+            <button class="btn primary" id="predict-btn" type="button">Classify</button>
+          </div>
+          <div class="sample-chips">
+            <span class="chip-label">Quick load:</span>
+            <button class="chip" data-kepid="11442793" type="button">Kepler-90 (confirmed)</button>
+            <button class="chip" data-kepid="10666592" type="button">KIC 10666592 (false+)</button>
+          </div>
+        </div>
+
+        <div id="exo-result" class="exo-result" aria-live="polite" hidden>
+          <div class="result-badge" id="result-badge"></div>
+          <div class="result-meta" id="result-meta"></div>
+          <div class="chart-wrap">
+            <canvas id="flux-chart" width="600" height="180" aria-label="Kepler light curve flux"></canvas>
+          </div>
+          <p class="chart-caption">64-point down-sampled normalised Kepler flux · dips indicate potential transits</p>
+        </div>
+
+        <div id="exo-error" class="error-banner" hidden></div>
+        <div id="exo-loading" class="loading-row" hidden>
+          <span class="spinner" aria-label="Loading"></span>
+          <span>Running CNN inference…</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <div class="inner">
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li><strong>Light curve fetch</strong> — The Kepler Space Telescope measured stellar brightness every 29.4 minutes for ~4 years. Each dip pattern is downloaded from the NASA Exoplanet Archive.</li>
+          <li><strong>Normalisation</strong> — Flux values are median-normalised and binned to 178 evenly spaced time steps, removing stellar variability.</li>
+          <li><strong>1-D CNN</strong> — A convolutional network scans the binned flux array and outputs a probability that the dip pattern belongs to a genuine planetary transit.</li>
+          <li><strong>Verdict</strong> — The model outputs <em>PLANET</em> or <em>FALSE POSITIVE</em> with a confidence score. False positives include eclipsing binaries, instrumental noise and background stars.</li>
+        </ol>
+        <p class="footnote">Google researchers used a similar CNN approach in 2017 to discover Kepler-90i, the eighth planet in the Kepler-90 system (KIC 11442793).</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-grid">
+      <div>
+        <p>Kepler data courtesy of NASA / CalTech. This project is not affiliated with or endorsed by NASA.</p>
+        <p><a href="/api/docs">Open the API reference</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/exoplanets.js"></script>
+</body>
+</html>
+
