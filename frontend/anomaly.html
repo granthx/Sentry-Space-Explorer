@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spacecraft Anomaly Detection — Space Explorer</title>
+  <meta name="description" content="LSTM autoencoder detects anomalies in real NASA SMAP satellite and Curiosity rover telemetry.">
+  <meta name="theme-color" content="#05071a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/anomaly.css">
+</head>
+<body>
+  <div class="nebula" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Space Explorer, home">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="currentColor"/>
+        <ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-24 16 16)"/>
+      </svg>
+      <span>Space Explorer</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/asteroids.html">Asteroids</a>
+      <a href="/mars.html">Mars</a>
+      <a href="/lab.html">Data Lab</a>
+      <a href="/exoplanets.html">Exoplanets</a>
+      <a href="/terrain.html">Terrain</a>
+      <a href="/anomaly.html" aria-current="page">Anomaly</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <h1>Spacecraft Anomaly Detection</h1>
+        <p class="lead">An LSTM autoencoder learns the normal rhythm of spacecraft sensor readings and flags anything unusual — a drifting sensor, a sudden spike, a systematic shift. Data comes from NASA's SMAP satellite and the Curiosity rover, with anomalies labelled by engineers at NASA JPL.</p>
+      </div>
+    </section>
+
+    <section class="anomaly-controls card-section">
+      <div class="inner">
+        <h2>Select a channel</h2>
+
+        <div class="anomaly-form">
+          <div class="field-row">
+            <label class="field">
+              <span>Dataset</span>
+              <select id="dataset-select">
+                <option value="smap">NASA SMAP Satellite</option>
+                <option value="msl">Curiosity Rover (MSL)</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Sensor channel</span>
+              <select id="channel-select">
+                <option value="T-1">T-1</option>
+                <option value="T-2">T-2</option>
+                <option value="T-3">T-3</option>
+                <option value="D-14">D-14</option>
+                <option value="F-4">F-4</option>
+              </select>
+            </label>
+            <button class="btn primary" id="detect-btn" type="button">Run detection</button>
+          </div>
+        </div>
+
+        <div id="anomaly-loading" class="loading-row" hidden>
+          <span class="spinner" aria-label="Loading"></span>
+          <span>Running LSTM inference…</span>
+        </div>
+        <div id="anomaly-error" class="error-banner" hidden></div>
+
+        <div id="anomaly-result" class="anomaly-result" hidden>
+          <div class="anomaly-summary" id="anomaly-summary"></div>
+          <div class="chart-wrap">
+            <canvas id="anomaly-chart" width="700" height="220" aria-label="Reconstruction error over time"></canvas>
+          </div>
+          <p class="chart-caption">Per-window reconstruction error · red regions exceed the 95th-percentile threshold</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <div class="inner">
+        <h2>How the LSTM autoencoder works</h2>
+        <ol class="steps">
+          <li><strong>Windowing</strong> — The sensor time series is split into overlapping 25-step windows with a stride of 5.</li>
+          <li><strong>Normalisation</strong> — Each window is zero-mean unit-variance normalised so the model is amplitude-agnostic.</li>
+          <li><strong>Autoencoder reconstruction</strong> — The LSTM encoder compresses each window to a latent vector; the decoder reconstructs the original. Normal windows reconstruct well; anomalous ones do not.</li>
+          <li><strong>Threshold</strong> — Windows whose reconstruction error exceeds the 95th percentile of training errors are flagged as anomalies.</li>
+          <li><strong>Severity</strong> — Anomaly rate drives severity: &lt;5% low, 5–20% medium, &gt;20% high.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-grid">
+      <div>
+        <p>Telemetry data courtesy of NASA. SMAP anomaly labels from NASA JPL. Not affiliated with or endorsed by NASA.</p>
+        <p><a href="/api/docs">Open the API reference</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/anomaly.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,55 @@
+/* ── Spacecraft Anomaly Detection page styles ──────────────────── */
+
+.anomaly-form .field-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.anomaly-form .field {
+  flex: 1 1 160px;
+}
+
+/* Result */
+.anomaly-result {
+  margin-top: 1.5rem;
+}
+
+.anomaly-summary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.severity-none   { background: rgba(96,211,148,0.1);  color: #60d394; border: 1px solid rgba(96,211,148,0.3); }
+.severity-low    { background: rgba(250,220,70,0.1);  color: #fadc46; border: 1px solid rgba(250,220,70,0.3); }
+.severity-medium { background: rgba(250,150,50,0.1);  color: #fa9632; border: 1px solid rgba(250,150,50,0.3); }
+.severity-high   { background: rgba(255,80,80,0.12);  color: #ff6464; border: 1px solid rgba(255,80,80,0.3); }
+
+.anomaly-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+#anomaly-chart {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
