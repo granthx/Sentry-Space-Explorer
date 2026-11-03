@@ -6,7 +6,7 @@ finished, flip that module's status to "live" and add its "href".
 
 from __future__ import annotations
 
-CURRENT_PHASE = 3
+CURRENT_PHASE = 6
 
 MODULES: list[dict] = [
     {
@@ -49,6 +49,48 @@ MODULES: list[dict] = [
             "Photos per sol, cameras and quiet periods",
             "Rover-to-rover comparisons",
             "Ask questions in plain language",
+        ],
+    },
+    {
+        "id": "exoplanets",
+        "name": "Exoplanet Finder",
+        "tagline": "A 1-D CNN reads NASA Kepler light curves and decides whether the dip is a real planet.",
+        "phase": 4,
+        "status": "live",
+        "href": "/exoplanets.html",
+        "api": "NASA Exoplanet Archive + ONNX",
+        "features": [
+            "Transit classification: PLANET vs FALSE POSITIVE",
+            "Confidence score and 64-point flux chart",
+            "Google's Kepler-90i approach replicated",
+        ],
+    },
+    {
+        "id": "terrain",
+        "name": "Mars Terrain Segmentation",
+        "tagline": "Pixel-wise segmentation of Mars rover images into soil, bedrock, sand and big rocks.",
+        "phase": 5,
+        "status": "live",
+        "href": "/terrain.html",
+        "api": "NASA JPL AI4Mars + ONNX",
+        "features": [
+            "Four terrain classes with colour overlay",
+            "Safe-to-drive assessment",
+            "NASA JPL AI4Mars dataset approach",
+        ],
+    },
+    {
+        "id": "anomaly",
+        "name": "Spacecraft Anomaly Detection",
+        "tagline": "An LSTM autoencoder flags unusual sensor readings in real NASA SMAP and Curiosity telemetry.",
+        "phase": 6,
+        "status": "live",
+        "href": "/anomaly.html",
+        "api": "NASA SMAP / MSL + ONNX",
+        "features": [
+            "Sliding-window reconstruction error",
+            "SMAP satellite and Curiosity rover channels",
+            "Severity classification: none → high",
         ],
     },
 ]
