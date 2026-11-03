@@ -12,7 +12,7 @@ from .cache import TTLCache
 from .config import PROJECT_DIR, get_settings
 from .errors import register_error_handlers
 from .nasa_client import NasaClient
-from .routers import apod, assistant, asteroids, health, lab, mars, modules
+from .routers import apod, assistant, asteroids, exoplanets, health, lab, mars, modules, terrain, anomaly
 
 
 @asynccontextmanager
@@ -75,7 +75,7 @@ def create_app() -> FastAPI:
 
     register_error_handlers(app)
 
-    for router in (health.router, modules.router, apod.router, asteroids.router, mars.router, lab.router, assistant.router):
+    for router in (health.router, modules.router, apod.router, asteroids.router, mars.router, lab.router, assistant.router, exoplanets.router, terrain.router, anomaly.router):
         app.include_router(router, prefix="/api")
 
     # Serve the ../frontend folder at "/" so one command runs everything.
