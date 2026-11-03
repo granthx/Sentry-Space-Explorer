@@ -20,20 +20,27 @@ def test_health_does_not_call_nasa(api):
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "ok"
-    assert body["phase"] == 3
+    assert body["phase"] == 6
     assert body["api_key_mode"] in {"demo", "registered"}
     assert api.calls == []
 
 
 def test_modules_lists_three_modules(api):
     body = api.http.get("/api/modules").json()
-    assert [m["id"] for m in body["modules"]] == ["asteroids", "mars-images", "mars-data"]
+    ids = [m["id"] for m in body["modules"]]
+    assert ids == ["asteroids", "mars-images", "mars-data", "exoplanets", "terrain", "anomaly"]
     assert body["modules"][0]["status"] == "live"
     assert body["modules"][0]["href"] == "/asteroids.html"
     assert body["modules"][1]["status"] == "live"
     assert body["modules"][1]["href"] == "/mars.html"
     assert body["modules"][2]["status"] == "live"
     assert body["modules"][2]["href"] == "/lab.html"
+    assert body["modules"][3]["status"] == "live"
+    assert body["modules"][3]["href"] == "/exoplanets.html"
+    assert body["modules"][4]["status"] == "live"
+    assert body["modules"][4]["href"] == "/terrain.html"
+    assert body["modules"][5]["status"] == "live"
+    assert body["modules"][5]["href"] == "/anomaly.html"
 
 
 def test_apod_is_normalised(api):
